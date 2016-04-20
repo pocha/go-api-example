@@ -7,9 +7,8 @@ The API provides a single endpoint `/repos?user=<github_username>` that wraps up
 
 ### Getting Started
 
-- clone the repo
-- cd into the root of the project
-- `go run main.go`
+- `go get github.com/kpurdon/go-api-example`
+- run `go-api-example`
 - `curl localhost:8080/repos?user=<github_username>`
 
 ### Project Structure
