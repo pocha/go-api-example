@@ -11,8 +11,7 @@ type Client interface {
 	Get(string) ([]Repo, error)
 }
 
-// ReposClient provides an implmentation of the C interface
-// TODO: naming repos.ReposClient (name stutter)
+// ReposClient provides an implmentation of the Client interface
 type ReposClient struct{}
 
 // Repo representes GitHub repository

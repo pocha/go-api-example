@@ -38,7 +38,7 @@ func TestGet(t *testing.T) {
 			expectedRepos: []Repo(nil),
 			expectedError: errors.New("github api: no results found"),
 		},
-		// TODO: not all cases are tested, but this is enough of a sample
+		// TODO not all cases are covered
 	}
 
 	for _, tc := range tests {
