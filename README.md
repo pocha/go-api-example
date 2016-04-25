@@ -17,8 +17,8 @@ The API provides a single endpoint `/repos?user=<github_username>` that wraps up
 ├── README.md
 ├── internal
 │   └── repos
-│       ├── main.go          - provides internal functions for calling the GitHub API
-│       └── main_test.go     - tests the internal function ("mocking" out the GitHub API calls)
+│       ├── repos.go         - provides internal functions for calling the GitHub API
+│       └── repos_test.go    - tests the internal function ("mocking" out the GitHub API calls)
 ├── main.go                  - provides the server and handler initalization
 └── main_test.go             - tests the handler ("mocking" out the internal function calls)
 ```
