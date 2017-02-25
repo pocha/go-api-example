@@ -1,12 +1,13 @@
-package main
+package main_test
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-  "github.com/pocha/sms-gateway-go-sample/main"
 	"github.com/stretchr/testify/assert"
+  "github.com/pocha/sms-gateway-go-sample/main"
+  "encoding/json"
+  "bytes"
 )
 
 type Data struct {
@@ -30,13 +31,13 @@ func TestSMSHandler(t *testing.T) {
 		{
 			description:        "valid test data",
 			url:                "/outbound/sms",
-      input:               {
+      input:              Data{
                               from: 919538384545,
                               to:   919845350048,
                               message:  "hello how are you",
                             },
 			expectedStatusCode: 200,
-      output:              { "message" : "outbound sms ok", "error" : "" },
+      output:              map[string]string{ "message" : "outbound sms ok", "error" : "" },
 		}, 	
   }
 
@@ -50,7 +51,7 @@ func TestSMSHandler(t *testing.T) {
     req.Header.Set("Content-Type", "application/json")
 
 		w := httptest.NewRecorder()
-		main.SMSHandler(w, req)
+		SMSHandler(w, req)
 
 		assert.Equal(tc.expectedStatusCode, w.Code, tc.description)
 		assert.Equal(tc.output, w.Body, tc.description)
