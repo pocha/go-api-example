@@ -1,51 +1,54 @@
-package main_test
+package main
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"github.com/stretchr/testify/assert"
-  "github.com/pocha/sms-gateway-go-sample/main"
   "encoding/json"
   "bytes"
+  "fmt"
 )
-
-type Data struct {
-  from, to uint64
-  message string
-}
 
 
 
 func TestSMSHandler(t *testing.T) {
 	assert := assert.New(t)
 
+  validData := SMS {
+                  From: "919538384545",
+                  To:   "919845350048",
+                  Message:  "hello how are you",
+                }
 
-	tests := []struct {
+
+  jsonData, _ := json.Marshal(validData)
+  validHash := buildHash(jsonData)
+  fmt.Println("validHash", validHash)
+
+	successTests := []struct {
 		description        string
 		url                string
-    input              Data
+    input              SMS
 		expectedStatusCode int
     output             map[string]string
 	}{
 		{
 			description:        "valid test data",
-			url:                "/outbound/sms",
-      input:              Data{
-                              from: 919538384545,
-                              to:   919845350048,
-                              message:  "hello how are you",
-                            },
+			url:                "/outbound/sms?hash=" + validHash,
+      input:              validData,
 			expectedStatusCode: 200,
-      output:              map[string]string{ "message" : "outbound sms ok", "error" : "" },
+      output:             map[string]string{ "message" : "outbound sms ok", "error" : "" },
 		}, 	
   }
 
-	for _, tc := range tests {
-
+	for _, tc := range successTests {
+    
     input, err := json.Marshal(tc.input)
-    output, err := json.Marshal(tc.output)
-
+    if err != nil {
+      fmt.Println("error encounted", err)
+    }
+     
 		req, err := http.NewRequest("POST", tc.url, bytes.NewBuffer(input))
 		assert.NoError(err)
     req.Header.Set("Content-Type", "application/json")
@@ -54,6 +57,8 @@ func TestSMSHandler(t *testing.T) {
 		SMSHandler(w, req)
 
 		assert.Equal(tc.expectedStatusCode, w.Code, tc.description)
-		assert.Equal(tc.output, w.Body, tc.description)
+    
+    output, _ := json.Marshal(tc.output)
+		assert.Equal(string(output), w.Body.String(), tc.description)
 	}
 }
