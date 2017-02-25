@@ -4,44 +4,55 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"github.com/kpurdon/go-api-example/internal/repos"
+  "crypto/hmac"
+  "crypto/sha256"
+  "github.com/pocha/sms-gateway-go-sample/sms"
 )
 
-// App defines the application container
-type App struct {
-	repos repos.Client
+const auth_username = "ashish"
+const auth_password = "34b5db01-8bc3-4960-92d7-d83155a42dfe"
+
+
+
+type Output struct {
+  error, message string
 }
 
-// GetReposHandler returns a list of (public) repositories for a given GitHub user
-func (a *App) GetReposHandler(w http.ResponseWriter, r *http.Request) {
-	user := r.FormValue("user")
-	if user == "" {
-		http.Error(w, "MISSING_ARG_USER", 400)
+
+func SMSHandler(w http.ResponseWriter, r *http.Request) {
+	
+  if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, "only json data accepted", 400)
 		return
 	}
 
-	repos, err := a.repos.Get(user)
-	if err != nil {
-		http.Error(w, "INTERNAL_ERROR", 500)
+  data := r.Body
+  hash = r.FormValue("hash")
+  mac := hmac.New(sha256.New, auth_password)
+  mac.Write(data)
+  expectedMAC := mac.Sum(nil)
+  
+  //check hash
+  if hmac.Equal(hash,expectedMAC) == false {
+		http.Error(w, "authentication failed", 400)
 		return
 	}
-
-	b, err := json.Marshal(repos)
+  
+	err := json.NewDecoder(data).Decode(models.SMS)
 	if err != nil {
-		http.Error(w, "INTERNAL_ERROR", 500)
+		http.Error(w, "invalid json", 400)
 		return
 	}
+  
+  output := json.Marshal(map[string]string { "message" : "outbound sms ok", "error": "" } )
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(b)
+	w.Write(output)
 }
 
 func main() {
-	app := &App{repos: repos.ReposClient{}}
+	http.HandleFunc("/outbound/sms", SMSHandler)
 
-	http.HandleFunc("/repos", app.GetReposHandler)
-
-	log.Println("listening on 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("starting server")
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
