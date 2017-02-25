@@ -55,18 +55,17 @@ func SMSHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "only json data accepted", 400)
 		return
 	}
+    
+     
 
 	var data SMS
-	_ = json.Unmarshal(getBodyJson(r), &data)
-	log.Println("sms data", data)
-
-	var sms_map map[string]interface{}
-	err := json.Unmarshal(getBodyJson(r), &sms_map)
+	err := json.Unmarshal(getBodyJson(r), &data)
 	if err != nil {
 		http.Error(w, "invalid json", 400)
 		return
 	}
-	log.Println("sms_map", sms_map)
+	log.Println("sms data", data)
+
 
 	hash := r.FormValue("hash")
 	if hash == "" {
@@ -86,17 +85,21 @@ func SMSHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//check for elements presence
-	_, ok := sms_map["from"]
+	var smsMap map[string]interface{}
+	err = json.Unmarshal(getBodyJson(r), &smsMap)
+	log.Println("smsMap", smsMap)
+
+	_, ok := smsMap["from"]
 	if ok == false {
 		exitWithJson(w, "", "from field absent")
 		return
 	}
-	_, ok = sms_map["to"]
+	_, ok = smsMap["to"]
 	if ok == false {
 		exitWithJson(w, "", "to field absent")
 		return
 	}
-	_, ok = sms_map["message"]
+	_, ok = smsMap["message"]
 	if ok == false {
 		exitWithJson(w, "", "message field absent")
 		return
