@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+    "regexp"
 )
 
 const auth_username = "ashish"
@@ -105,12 +106,14 @@ func SMSHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//validate elements - not sure why the count yields one more digit
-	if strings.Count(data.From, "") != 13 {
+	//validate from, to elements
+    regex, _ := regexp.Compile("^([0-9]){12}$")
+
+	if regex.MatchString(data.From) == false {
 		exitWithJson(w, "", "invalid from field")
 		return
 	}
-	if strings.Count(data.To, "") != 13 {
+	if regex.MatchString(data.To) == false {
 		exitWithJson(w, "", "invalid to field")
 		return
 	}
